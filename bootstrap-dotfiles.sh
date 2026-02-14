@@ -6,7 +6,7 @@ DOTFILES_DIR="${HOME}/dotfiles"
 REPO_URL="git@github.com:ReeceYankey/dotfiles.git"
 
 usage() {
-  echo "Usage: $0 <clone|nvim|all>" >&2
+  echo "Usage: $0 <all|manual>" >&2
   exit 2
 }
 
@@ -52,6 +52,7 @@ backup_conflicts() {
 
 install_all() {
   echo "Installing all config files..."
+  ensure_repo_cloned
 
   if config checkout; then
     echo "Checked out config."
@@ -63,9 +64,15 @@ install_all() {
 
 }
 
-install_nvim() {
-  echo "Installing Neovim config..."
-  echo "!Not implemented!"
+setup_manual() {
+  echo "Cloning and setting up repo for manual use"
+  ensure_repo_cloned
+  add_alias
+
+  # this allows for checking out individual files
+  config restore --staged $HOME
+
+  echo "You can now checkout individual dotfiles with 'config checkout main -- path/to/file'"
 }
 
 # ------------------------
@@ -77,18 +84,11 @@ if [ "$#" -ne 1 ]; then
 fi
 
 case "$1" in
-  clone)
-    ensure_repo_cloned
-    add_alias
-    ;;
-
-  nvim)
-    ensure_repo_cloned
-    install_nvim
+  manual)
+    setup_manual
     ;;
 
   all)
-    ensure_repo_cloned
     install_all
     ;;
 
